@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Ashoka College Email DFA</title>
+
+    <style>
+        body {
+            margin: 0;
+            padding: 40px;
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #d6eaf8, #ebdef0);
+            text-align: center;
+        }
+
+        .container {
+            width: 700px;
+            max-width: 90%;
+            margin: auto;
+            background: white;
+            padding: 30px;
+            border-radius: 18px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+        }
+
+        h1 {
+            color: #1b4f72;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #555;
+            margin-bottom: 25px;
+        }
+
+        .input-area {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        input {
+            width: 65%;
+            padding: 13px;
+            border: 2px solid #5dade2;
+            border-radius: 8px;
+            font-size: 16px;
+            outline: none;
+        }
+
+        input:focus {
+            border-color: #21618c;
+        }
+
+        button {
+            padding: 13px 22px;
+            border: none;
+            border-radius: 8px;
+            background: #2874a6;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #1b4f72;
+        }
+
+        #result {
+            margin-top: 25px;
+            padding: 18px;
+            border-radius: 10px;
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .accepted {
+            background: #d5f5e3;
+            color: #186a3b;
+        }
+
+        .rejected {
+            background: #fadbd8;
+            color: #922b21;
+        }
+
+        .path-box {
+            margin-top: 25px;
+            padding: 20px;
+            background: #f4f6f7;
+            border-radius: 10px;
+            overflow-x: auto;
+        }
+
+        .state {
+            display: inline-block;
+            min-width: 35px;
+            padding: 10px;
+            margin: 5px 2px;
+            border-radius: 50%;
+            background: #3498db;
+            color: white;
+            font-weight: bold;
+        }
+
+        .accept {
+            background: #28b463;
+        }
+
+        .dead {
+            background: #e74c3c;
+        }
+
+        .details {
+            margin-top: 25px;
+            text-align: left;
+            background: #f8f9f9;
+            padding: 20px;
+            border-radius: 10px;
+        }
+
+        .details h3 {
+            color: #1b4f72;
+        }
+
+        .details p {
+            margin: 10px 0;
+        }
+
+        .rule {
+            margin-top: 20px;
+            padding: 15px;
+            background: #eaf2f8;
+            border-left: 5px solid #3498db;
+            text-align: left;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>📧 DFA Email Validator</h1>
+
+    <p class="subtitle">
+        Ashoka College Email Verification System
+    </p>
+
+    <div class="rule">
+        <b>Valid Domain:</b> @ashokacollege.in
+    </div>
+
+    <br>
+
+    <div class="input-area">
+
+        <input
+            type="text"
+            id="email"
+            placeholder="Enter your email">
+
+        <button onclick="checkEmail()">
+            Validate
+        </button>
+
+    </div>
+
+    <div id="result"></div>
+
+    <h3>DFA Transition Path</h3>
+
+    <div id="path" class="path-box">
+        Enter an email to see the DFA path.
+    </div>
+
+    <div class="details">
+
+        <h3>🔹 DFA States</h3>
+
+        <p><b>q0</b> → Initial State</p>
+
+        <p><b>q1</b> → Reading Username</p>
+
+        <p><b>q2</b> → @ Symbol Detected</p>
+
+        <p><b>q3</b> → Reading Domain</p>
+
+        <p><b>q4</b> → Reading .in</p>
+
+        <p><b>q5</b> → Final / Accept State</p>
+
+        <p><b>qd</b> → Dead / Reject State</p>
+
+    </div>
+
+</div>
+
+<script>
+
+function checkEmail() {
+
+    let email = document.getElementById("email").value.trim();
+
+    let result = document.getElementById("result");
+
+    let path = document.getElementById("path");
+
+    result.innerHTML = "";
+    path.innerHTML = "";
+
+    // Empty input
+    if (email.length === 0) {
+
+        result.className = "rejected";
+
+        result.innerHTML =
+            "❌ REJECTED<br>" +
+            "<small>Email cannot be empty</small>";
+
+        path.innerHTML =
+            '<span class="state">q0</span>' +
+            ' → ' +
+            '<span class="state dead">qd</span>';
+
+        return;
+    }
+
+    // Find @ symbol
+    let atPosition = email.indexOf("@");
+
+    if (atPosition <= 0) {
+
+        result.className = "rejected";
+
+        result.innerHTML =
+            "❌ REJECTED<br>" +
+            "<small>Invalid username or @ symbol</small>";
+
+        path.innerHTML =
+            '<span class="state">q0</span>' +
+            ' → ' +
+            '<span class="state dead">qd</span>';
+
+        return;
+    }
+
+    let username = email.substring(0, atPosition);
+
+    let domain = email.substring(atPosition + 1);
+
+    let transition = '<span class="state">q0</span>';
+
+    // Username transition
+    for (let i = 0; i < username.length; i++) {
+
+        transition +=
+            ' → <span class="state">q1</span>';
+    }
+
+    // @ transition
+    transition +=
+        ' → <span class="state">q2</span>';
+
+    // Check exact domain
+    if (domain === "ashokacollege.in") {
+
+        // Move through domain characters
+        for (let i = 0; i < 14; i++) {
+
+            transition +=
+                ' → <span class="state">q3</span>';
+        }
+
+        // .in
+        transition +=
+            ' → <span class="state">q4</span>';
+
+        // Final state
+        transition +=
+            ' → <span class="state accept">q5</span>';
+
+        result.className = "accepted";
+
+        result.innerHTML =
+            "✅ EMAIL ACCEPTED<br>" +
+            "<small>" + email + "</small>";
+
+    } else {
+
+        transition +=
+            ' → <span class="state dead">qd</span>';
+
+        result.className = "rejected";
+
+        result.innerHTML =
+            "❌ EMAIL REJECTED<br>" +
+            "<small>Domain must be @ashokacollege.in</small>";
+    }
+
+    path.innerHTML = transition;
+}
+
+</script>
+
+</body>
+</html>
